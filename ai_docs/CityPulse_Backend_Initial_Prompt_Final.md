@@ -7,7 +7,7 @@
 
 ## Mission (MVP)
 
-> **Note — Multimodal change:** Transcription now combines **audio ASR** + **frame captioning** + **OCR** and fuses them into a single text stream. Silent videos are supported.
+> **Note — Multimodal change:** Transcription now combines **audio ASR** + **frame captioning** + **OCR** and fuses them into a single text stream. Silent videos are supported. Also use uv for package management instead of the pip+venv.
 
 
 **CityPulse** is a **24-hour, borough-based short-video feed** for NYC. Each uploaded clip is:
@@ -34,8 +34,9 @@ We use **Atlas Vector Search** for:
 2) Tap **Like** on 2–3 related clips → refresh → visible **re-ranking** (memory).  
 3) **Ask NYC** (“What’s happening in Williamsburg right now?”) → 2–3 sentence RAG summary from recent clips.  
 4) **Upload** a clip from camera roll → API processes → file lands in **S3**, doc in **Atlas** with `expiresAt` + `embedding`, then appears in feed.
+5) Auth needs to have login
 
-**Out of scope (MVP):** auth, comments, follows/reposts, DMs, auto-blurring, neighborhood feeds, push notifications.
+**Out of scope (MVP):** comments, follows/reposts, DMs, auto-blurring, neighborhood feeds, push notifications.
 
 ---
 
@@ -50,6 +51,7 @@ We use **Atlas Vector Search** for:
   - LLM (titles/tags & Ask NYC summary): `gpt-4o-mini`
   - multimodal transcription: OpenAI **Whisper API**
 - Provide a **mock mode** for all providers to make seeding reliable offline.
+-Docker
 
 > **Implementation choice for MVP uploads:**  
 > Use a **simple server-mediated upload**: the mobile app POSTs the mp4 to FastAPI; backend streams it to S3, then deletes any temp file.  
@@ -367,23 +369,28 @@ You are a concise live-events summarizer. Given multiple short clips (title, tag
 ## README Commands (include)
 
 ```bash
-# setup (on EC2)
+# one-time install (choose one)
+curl -LsSf https://astral.sh/uv/install.sh | sh   # adds ~/.local/bin/uv
+# or: brew install uv
+
+# setup (on EC2 or local)
 sudo apt update && sudo apt install -y ffmpeg
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env   # fill in vars
+uv venv                                    # creates .venv
+uv sync                                     # installs from pyproject/uv.lock (fast)
+cp .env.example .env                        # fill in vars
 
-# run api
-uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --reload
+# run api  (adjust module path to your layout; ex: backend.app.main:app)
+uv run uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --reload
 
-# create indexes (on Atlas)
-python scripts/create_indexes.py
+# create indexes
+uv run python scripts/create_indexes.py
 
-# seed demo data (uses mock providers by default; uploads to S3)
-python scripts/seed.py
+# seed demo data
+uv run python scripts/seed.py
 
 # tests
-pytest -q
+uv run pytest -q
+
 ```
 
 ---
