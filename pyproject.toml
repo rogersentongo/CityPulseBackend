@@ -24,6 +24,13 @@ dependencies = [
     "tenacity>=8.2.0",
     "python-jose[cryptography]>=3.3.0",
     "passlib[bcrypt]>=1.7.4",
+    "sentence-transformers>=5.1.0",
+    "transformers>=4.56.1",
+    "torch>=2.8.0",
+    "torchvision>=0.23.0",
+    "torchaudio>=2.8.0",
+    "openai-whisper>=20250625",
+    "ollama>=0.3.0",
 ]
 
 [project.optional-dependencies]

@@ -17,6 +17,29 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
+# Import Hugging Face providers
+try:
+    from app.llm_providers.huggingface import (
+        HuggingFaceEmbeddingProvider,
+        HuggingFaceLLMProvider,
+        HuggingFaceTranscriptionProvider
+    )
+    HF_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"HuggingFace providers not available: {e}")
+    HF_AVAILABLE = False
+
+# Import Ollama providers
+try:
+    from app.llm_providers.ollama import (
+        OllamaEmbeddingProvider,
+        OllamaLLMProvider
+    )
+    OLLAMA_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"Ollama providers not available: {e}")
+    OLLAMA_AVAILABLE = False
+
 
 class TitleTagsResponse(BaseModel):
     """Response model for title and tags generation."""
@@ -337,6 +360,14 @@ class LLMService:
         """Get transcription provider based on configuration."""
         if settings.transcribe_provider == "openai" and settings.openai_api_key:
             return OpenAITranscriptionProvider(settings.openai_api_key)
+        elif settings.transcribe_provider == "huggingface" and HF_AVAILABLE:
+            logger.info("🤗 Using HuggingFace transcription provider")
+            return HuggingFaceTranscriptionProvider()
+        elif settings.transcribe_provider == "ollama" and HF_AVAILABLE:
+            # For transcription, we'll use the existing Whisper implementation from HuggingFace
+            # since Ollama doesn't have good transcription models yet
+            logger.info("🦙 Using Ollama transcription provider (local Whisper)")
+            return HuggingFaceTranscriptionProvider()
         else:
             logger.info("🎭 Using mock transcription provider")
             return MockTranscriptionProvider()
@@ -345,6 +376,12 @@ class LLMService:
         """Get embedding provider based on configuration."""
         if settings.embeddings_provider == "openai" and settings.openai_api_key:
             return OpenAIEmbeddingProvider(settings.openai_api_key, settings.embedding_model)
+        elif settings.embeddings_provider == "huggingface" and HF_AVAILABLE:
+            logger.info("🤗 Using HuggingFace embedding provider")
+            return HuggingFaceEmbeddingProvider()
+        elif settings.embeddings_provider == "ollama" and OLLAMA_AVAILABLE:
+            logger.info("🦙 Using Ollama embedding provider")
+            return OllamaEmbeddingProvider(settings.ollama_embedding_model, settings.ollama_host)
         else:
             logger.info("🎭 Using mock embedding provider")
             return MockEmbeddingProvider()
@@ -353,6 +390,12 @@ class LLMService:
         """Get LLM provider based on configuration."""
         if settings.llm_provider == "openai" and settings.openai_api_key:
             return OpenAILLMProvider(settings.openai_api_key, settings.llm_model)
+        elif settings.llm_provider == "huggingface" and HF_AVAILABLE:
+            logger.info("🤗 Using HuggingFace LLM provider")
+            return HuggingFaceLLMProvider()
+        elif settings.llm_provider == "ollama" and OLLAMA_AVAILABLE:
+            logger.info("🦙 Using Ollama LLM provider")
+            return OllamaLLMProvider(settings.ollama_llm_model, settings.ollama_host)
         else:
             logger.info("🎭 Using mock LLM provider")
             return MockLLMProvider()

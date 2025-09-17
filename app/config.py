@@ -24,9 +24,15 @@ class Settings(BaseSettings):
     openai_api_key: str = Field(default="", description="OpenAI API key")
     embedding_model: str = Field(default="text-embedding-3-small")
     llm_model: str = Field(default="gpt-4o-mini")
-    transcribe_provider: Literal["openai", "mock"] = Field(default="mock")
-    embeddings_provider: Literal["openai", "mock"] = Field(default="mock")
-    llm_provider: Literal["openai", "mock"] = Field(default="mock")
+    transcribe_provider: Literal["openai", "huggingface", "ollama", "mock"] = Field(default="ollama")
+    embeddings_provider: Literal["openai", "huggingface", "ollama", "mock"] = Field(default="ollama")
+    llm_provider: Literal["openai", "huggingface", "ollama", "mock"] = Field(default="ollama")
+
+    # Ollama Configuration
+    ollama_host: str = Field(default="http://localhost:11434", description="Ollama server host")
+    ollama_llm_model: str = Field(default="llama3.2:3b", description="Ollama LLM model")
+    ollama_embedding_model: str = Field(default="nomic-embed-text", description="Ollama embedding model")
+    ollama_transcribe_model: str = Field(default="whisper", description="Ollama transcription model (or use local whisper)")
 
     # Local Media Configuration
     media_base_path: str = Field(default="./app/media", description="Base path for local media storage")
@@ -40,7 +46,7 @@ class Settings(BaseSettings):
     borough_reject_if_unknown: bool = Field(default=True)
 
     # Multimodal Processing
-    vision_provider: Literal["openai", "mock"] = Field(default="mock")
+    vision_provider: Literal["openai", "huggingface", "mock"] = Field(default="mock")
     ocr_provider: Literal["tesseract", "textract", "mock"] = Field(default="tesseract")
     frame_sample_fps: float = Field(default=0.5, description="Frames per second for video sampling")
     scene_detect: bool = Field(default=True)
