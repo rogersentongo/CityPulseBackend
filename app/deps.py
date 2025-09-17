@@ -1,9 +1,8 @@
-"""Application dependencies - database, S3, OpenAI clients."""
+"""Application dependencies - database, local media, OpenAI clients."""
 import logging
 from functools import lru_cache
 from typing import AsyncGenerator
 
-import boto3
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from openai import AsyncOpenAI
 from pymongo.errors import ServerSelectionTimeoutError
@@ -161,25 +160,6 @@ async def get_database() -> AsyncIOMotorDatabase:
             return db_manager.get_database()
 
 
-@lru_cache()
-def get_s3_client():
-    """Get boto3 S3 client with proper configuration."""
-    try:
-        # Try to use IAM role first (for EC2), then fall back to env vars
-        client = boto3.client(
-            's3',
-            region_name=settings.aws_region
-        )
-
-        # Test S3 access by checking if bucket exists
-        client.head_bucket(Bucket=settings.s3_bucket)
-        logger.info(f"✅ S3 client connected: {settings.s3_bucket}")
-        return client
-
-    except Exception as e:
-        logger.error(f"❌ S3 connection failed: {e}")
-        logger.warning("⚠️  Continuing without S3 (mock mode available)")
-        raise
 
 
 @lru_cache()
@@ -198,7 +178,6 @@ async def validate_connections() -> dict[str, bool]:
     """Validate all external service connections."""
     results = {
         "mongodb": False,
-        "s3": False,
         "openai": False,
     }
 
@@ -208,13 +187,6 @@ async def validate_connections() -> dict[str, bool]:
         results["mongodb"] = True
     except Exception as e:
         logger.error(f"MongoDB validation failed: {e}")
-
-    # Test S3
-    try:
-        get_s3_client()
-        results["s3"] = True
-    except Exception as e:
-        logger.error(f"S3 validation failed: {e}")
 
     # Test OpenAI
     try:
