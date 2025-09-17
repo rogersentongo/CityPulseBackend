@@ -5,6 +5,7 @@ from typing import Annotated, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from bson import ObjectId
 
 from app.dao import get_db_ops, DatabaseOperations
 from app.deps import get_database
@@ -101,7 +102,7 @@ async def process_video_with_ai(
             }
 
             await db_ops.db.videos.update_one(
-                {"_id": video_id},
+                {"_id": ObjectId(video_id)},
                 {"$set": update_data}
             )
 
@@ -114,7 +115,7 @@ async def process_video_with_ai(
         # Update video with error status
         try:
             await db_ops.db.videos.update_one(
-                {"_id": video_id},
+                {"_id": ObjectId(video_id)},
                 {"$set": {
                     "transcript": "Processing failed",
                     "title": "Processing Error",

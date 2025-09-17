@@ -12,7 +12,7 @@ router = APIRouter()
 class ServiceStatus(BaseModel):
     """Service status model."""
     mongodb: bool
-    s3: bool
+    local_media: bool
     openai: bool
 
 
