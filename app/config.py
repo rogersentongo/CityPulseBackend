@@ -20,19 +20,16 @@ class Settings(BaseSettings):
     mongo_uri: str = Field(..., description="MongoDB Atlas connection string")
     mongo_db: str = Field(default="citypulse", description="Database name")
 
-    # OpenAI Configuration
-    openai_api_key: str = Field(..., description="OpenAI API key")
+    # OpenAI Configuration (optional for mock mode)
+    openai_api_key: str = Field(default="", description="OpenAI API key")
     embedding_model: str = Field(default="text-embedding-3-small")
     llm_model: str = Field(default="gpt-4o-mini")
-    transcribe_provider: Literal["openai", "mock"] = Field(default="openai")
-    embeddings_provider: Literal["openai", "mock"] = Field(default="openai")
-    llm_provider: Literal["openai", "mock"] = Field(default="openai")
+    transcribe_provider: Literal["openai", "mock"] = Field(default="mock")
+    embeddings_provider: Literal["openai", "mock"] = Field(default="mock")
+    llm_provider: Literal["openai", "mock"] = Field(default="mock")
 
-    # AWS S3 Configuration
-    aws_region: str = Field(default="us-east-1")
-    s3_bucket: str = Field(..., description="S3 bucket name for media storage")
-    s3_prefix: str = Field(default="uploads/", description="S3 key prefix")
-    s3_presign_expiry_seconds: int = Field(default=3600, description="Presigned URL validity")
+    # Local Media Configuration
+    media_base_path: str = Field(default="./app/media", description="Base path for local media storage")
 
     # API Configuration
     port: int = Field(default=8000)
@@ -43,7 +40,7 @@ class Settings(BaseSettings):
     borough_reject_if_unknown: bool = Field(default=True)
 
     # Multimodal Processing
-    vision_provider: Literal["openai", "mock"] = Field(default="openai")
+    vision_provider: Literal["openai", "mock"] = Field(default="mock")
     ocr_provider: Literal["tesseract", "textract", "mock"] = Field(default="tesseract")
     frame_sample_fps: float = Field(default=0.5, description="Frames per second for video sampling")
     scene_detect: bool = Field(default=True)
@@ -59,10 +56,6 @@ class Settings(BaseSettings):
         """Parse comma-separated origins."""
         return [origin.strip() for origin in v.split(",")]
 
-    @validator("s3_prefix")
-    def ensure_trailing_slash(cls, v: str) -> str:
-        """Ensure S3 prefix ends with slash."""
-        return v if v.endswith("/") else f"{v}/"
 
     @property
     def is_mock_mode(self) -> bool:

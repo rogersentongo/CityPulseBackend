@@ -35,7 +35,7 @@ async def test_mongodb():
             user_id="test_user",
             borough="Brooklyn",
             borough_source="manual",
-            s3_key="test/sample.mp4",
+            file_path="videos/20240917/test_user/sample.mp4",
             title="Test Video for MongoDB",
             tags=["test", "brooklyn", "demo"],
             transcript="This is a test video for MongoDB integration.",

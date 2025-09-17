@@ -8,7 +8,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from app.dao import DatabaseOperations, get_db_ops
 from app.deps import get_database
 from app.models import Borough, FeedResponse, VideoResponse, VALID_BOROUGHS
-from app.s3media import get_s3_manager
+from app.local_media import get_media_manager
 from app.utils.ranking import rank_videos_personalized, rank_videos_recency
 
 logger = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ async def get_personalized_feed(
         user = await db_ops.users.get_user(user_id)
 
         # Step 2: Determine ranking strategy
-        s3_manager = get_s3_manager()
+        media_manager = get_media_manager()
 
         if user.taste.n > 0:
             # User has taste profile - use personalized ranking
@@ -106,14 +106,14 @@ async def get_personalized_feed(
         # Step 3: Apply pagination and limits
         paginated_videos = ranked_videos[skip:skip + limit]
 
-        # Step 4: Generate presigned URLs and create response
-        logger.info(f"🔗 Generating presigned URLs for {len(paginated_videos)} videos")
+        # Step 4: Generate URLs and create response
+        logger.info(f"🔗 Generating URLs for {len(paginated_videos)} videos")
         video_responses = []
 
         for video, score_breakdown in paginated_videos:
             try:
-                # Generate fresh presigned URL for each video
-                media_url = s3_manager.generate_presigned_url(video.s3_key)
+                # Generate URL for each video
+                media_url = media_manager.get_url_path(video.file_path)
 
                 video_response = VideoResponse(
                     video_id=str(video.id) if video.id else "unknown",
@@ -198,13 +198,13 @@ async def get_recent_feed(
             since_hours=since_hours
         )
 
-        # Generate presigned URLs
-        s3_manager = get_s3_manager()
+        # Generate URLs
+        media_manager = get_media_manager()
         video_responses = []
 
         for video in videos:
             try:
-                media_url = s3_manager.generate_presigned_url(video.s3_key)
+                media_url = media_manager.get_url_path(video.file_path)
 
                 video_response = VideoResponse(
                     video_id=str(video.id) if video.id else "unknown",

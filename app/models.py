@@ -17,8 +17,7 @@ class VideoDocument(BaseModel):
     user_id: str = Field(..., description="User who uploaded the video")
     borough: Borough = Field(..., description="NYC borough")
     borough_source: Literal["manual", "gps"] = Field(..., description="How borough was determined")
-    s3_key: str = Field(..., description="S3 object key for video file")
-    media_url_ttl: Optional[datetime] = Field(None, description="When presigned URL expires")
+    file_path: str = Field(..., description="Local file path for video file")
     duration_sec: float = Field(default=0.0, description="Video duration in seconds")
 
     # Content processing results
@@ -98,7 +97,7 @@ class AskRequest(BaseModel):
 class VideoResponse(BaseModel):
     """Video response for feed endpoints."""
     video_id: str = Field(..., description="Video ID")
-    media_url: str = Field(..., description="Presigned URL for video playback")
+    media_url: str = Field(..., description="URL for video playback")
     title: str = Field(..., description="Video title")
     tags: list[str] = Field(..., description="Content tags")
     borough: Borough = Field(..., description="NYC borough")
@@ -109,7 +108,7 @@ class VideoResponse(BaseModel):
 class UploadResponse(BaseModel):
     """Upload completion response."""
     video_id: str = Field(..., description="Created video ID")
-    media_url: str = Field(..., description="Presigned URL for immediate playback")
+    media_url: str = Field(..., description="URL for immediate playback")
     borough: Borough = Field(..., description="Final borough assignment")
     borough_source: Literal["manual", "gps"] = Field(..., description="How borough was determined")
     title: str = Field(..., description="AI-generated title")

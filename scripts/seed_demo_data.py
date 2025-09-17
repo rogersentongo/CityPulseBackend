@@ -162,7 +162,7 @@ async def create_demo_video(video_data: dict, llm_service) -> str:
         user_id=video_data["user_id"],
         borough=video_data["borough"],
         borough_source="manual",
-        s3_key=f"demo/{video_data['user_id']}/{created_at.strftime('%Y%m%d_%H%M%S')}.mp4",
+        file_path=f"videos/{created_at.strftime('%Y%m%d')}/{video_data['user_id']}/{created_at.strftime('%H%M%S')}.mp4",
         duration_sec=45,  # Mock duration
         has_audio=True,
         transcript=video_data["transcript"],

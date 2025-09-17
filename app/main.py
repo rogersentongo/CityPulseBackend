@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.deps import shutdown_event, startup_event
@@ -47,6 +48,9 @@ app.include_router(upload.router, prefix="/api/v1", tags=["Upload"])
 app.include_router(feed.router, prefix="/api/v1", tags=["Feed"])
 app.include_router(like.router, prefix="/api/v1", tags=["Likes"])
 app.include_router(ask.router, prefix="/api/v1", tags=["Ask NYC"])
+
+# Mount static files for video serving
+app.mount("/media", StaticFiles(directory=settings.media_base_path), name="media")
 
 @app.get("/")
 async def root() -> dict[str, str]:

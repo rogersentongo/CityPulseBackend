@@ -9,7 +9,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from app.dao import get_db_ops, DatabaseOperations
 from app.deps import get_database
 from app.models import Borough, UploadResponse, VideoDocument, VALID_BOROUGHS
-from app.s3media import get_s3_manager
+from app.local_media import get_media_manager
 from app.utils.upload import get_upload_handler
 from app.utils.video import get_video_processor
 
@@ -26,7 +26,7 @@ async def get_db_ops_dependency(db: AsyncIOMotorDatabase = Depends(get_database)
 async def process_video_pipeline(
     video_id: str,
     temp_file_path: str,
-    s3_key: str,
+    file_path: str,
     user_id: str,
     borough: Borough,
     borough_source: str,
@@ -47,7 +47,7 @@ async def process_video_pipeline(
         await process_video_with_ai(
             video_id=video_id,
             temp_file_path=temp_file_path,
-            s3_key=s3_key,
+            file_path=file_path,
             user_id=user_id,
             borough=borough,
             db_ops=db_ops
@@ -70,7 +70,7 @@ async def process_video_pipeline(
 async def process_video_with_ai(
     video_id: str,
     temp_file_path: str,
-    s3_key: str,
+    file_path: str,
     user_id: str,
     borough: Borough,
     db_ops: DatabaseOperations,
@@ -190,7 +190,7 @@ async def upload_video(
     # Initialize services
     upload_handler = get_upload_handler()
     video_processor = get_video_processor()
-    s3_manager = get_s3_manager()
+    media_manager = get_media_manager()
 
     temp_file_path: Optional[str] = None
 
@@ -251,18 +251,18 @@ async def upload_video(
                 }
             )
 
-        # Step 4: Upload to S3
-        logger.info("☁️ Uploading video to S3")
-        s3_key = s3_manager.generate_s3_key(user_id, "mp4")
+        # Step 4: Save to local storage
+        logger.info("💾 Saving video to local storage")
+        file_path = media_manager.generate_file_path(user_id, "mp4")
 
         with upload_handler.get_file_stream(temp_file_path) as file_stream:
-            upload_result = await s3_manager.upload_video(
+            upload_result = await media_manager.save_video(
                 file_stream,
-                s3_key,
+                file_path,
                 content_type="video/mp4"
             )
 
-        logger.info(f"✅ Video uploaded to S3: {s3_key}")
+        logger.info(f"✅ Video saved locally: {file_path}")
 
         # Step 5: Create video document
         logger.info("💾 Creating video database record")
@@ -270,7 +270,7 @@ async def upload_video(
             user_id=user_id,
             borough=final_borough,
             borough_source=borough_source,
-            s3_key=s3_key,
+            file_path=file_path,
             duration_sec=duration,
             has_audio=video_info.get('has_audio', True),
             # For Phase 1, we'll add placeholder content
@@ -287,8 +287,8 @@ async def upload_video(
         video_id = await db_ops.videos.create_video(video_doc)
         logger.info(f"✅ Video record created: {video_id}")
 
-        # Step 6: Generate presigned URL for immediate access
-        media_url = s3_manager.generate_presigned_url(s3_key)
+        # Step 6: Generate URL for immediate access
+        media_url = media_manager.get_url_path(file_path)
 
         # Step 7: Start background processing
         logger.info("🔄 Starting background video processing")
@@ -296,7 +296,7 @@ async def upload_video(
             process_video_pipeline,
             video_id,
             temp_file_path,
-            s3_key,
+            file_path,
             user_id,
             final_borough,
             borough_source,
