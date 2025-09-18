@@ -9,6 +9,7 @@ export const createFeedSlice: StateCreator<FeedStore> = (set, get) => ({
   error: null,
   lastRefresh: Date.now(),
   feedMode: 'personalized',
+  currentPage: 1,
 
   // Actions
   setVideos: (videos) => {
@@ -37,12 +38,17 @@ export const createFeedSlice: StateCreator<FeedStore> = (set, get) => ({
     set({ error, isLoading: false });
   },
 
+  setCurrentPage: (currentPage) => {
+    set({ currentPage });
+  },
+
   refreshFeed: () => {
     set({
       videos: [],
       hasMore: true,
       error: null,
-      lastRefresh: Date.now()
+      lastRefresh: Date.now(),
+      currentPage: 1
     });
   },
 
@@ -56,7 +62,8 @@ export const createFeedSlice: StateCreator<FeedStore> = (set, get) => ({
     set({
       videos: [],
       hasMore: true,
-      error: null
+      error: null,
+      currentPage: 1
     });
   },
 });

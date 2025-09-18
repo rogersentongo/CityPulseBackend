@@ -38,6 +38,7 @@ export interface FeedState {
   error: string | null;
   lastRefresh: number;
   feedMode: 'personalized' | 'recent';
+  currentPage: number;
 }
 
 export interface FeedActions {
@@ -46,6 +47,7 @@ export interface FeedActions {
   setLoading: (loading: boolean) => void;
   setHasMore: (hasMore: boolean) => void;
   setError: (error: string | null) => void;
+  setCurrentPage: (page: number) => void;
   refreshFeed: () => void;
   setFeedMode: (mode: 'personalized' | 'recent') => void;
   clearFeed: () => void;
