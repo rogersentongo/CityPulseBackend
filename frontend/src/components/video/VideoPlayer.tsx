@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Pause, Volume2, VolumeX, Maximize } from 'lucide-react';
 import { VideoResponse } from '@/types/api';
@@ -10,7 +10,7 @@ interface VideoPlayerProps {
   autoPlay?: boolean;
 }
 
-export function VideoPlayer({ video, autoPlay = false }: VideoPlayerProps) {
+export const VideoPlayer = memo(function VideoPlayer({ video, autoPlay = false }: VideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -21,7 +21,14 @@ export function VideoPlayer({ video, autoPlay = false }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
 
-  const videoUrl = `http://localhost:8000/media/videos/${video.filename}`;
+  const videoUrl = `http://localhost:8000${video.media_url}`;
+
+  console.log('🎥 VideoPlayer - Video data:', {
+    video_id: video.video_id,
+    media_url: video.media_url,
+    constructed_url: videoUrl,
+    title: video.title
+  });
 
   useEffect(() => {
     const videoElement = videoRef.current;
@@ -43,16 +50,28 @@ export function VideoPlayer({ video, autoPlay = false }: VideoPlayerProps) {
       setIsBuffering(false);
     };
 
+    const handleError = (e: Event) => {
+      console.error('🎥 Video load error:', e, 'Video URL:', videoUrl);
+    };
+
+    const handleLoadStart = () => {
+      console.log('🎥 Video load started:', videoUrl);
+    };
+
     videoElement.addEventListener('timeupdate', handleTimeUpdate);
     videoElement.addEventListener('durationchange', handleDurationChange);
     videoElement.addEventListener('waiting', handleWaiting);
     videoElement.addEventListener('canplay', handleCanPlay);
+    videoElement.addEventListener('error', handleError);
+    videoElement.addEventListener('loadstart', handleLoadStart);
 
     return () => {
       videoElement.removeEventListener('timeupdate', handleTimeUpdate);
       videoElement.removeEventListener('durationchange', handleDurationChange);
       videoElement.removeEventListener('waiting', handleWaiting);
       videoElement.removeEventListener('canplay', handleCanPlay);
+      videoElement.removeEventListener('error', handleError);
+      videoElement.removeEventListener('loadstart', handleLoadStart);
     };
   }, []);
 
@@ -216,4 +235,4 @@ export function VideoPlayer({ video, autoPlay = false }: VideoPlayerProps) {
       </motion.div>
     </div>
   );
-}
+});

@@ -11,9 +11,9 @@ import { useFeed } from '@/hooks/useFeed';
 import { useRubberBand } from '@/hooks/useRubberBand';
 
 export function VideoFeed() {
-  const { userId, selectedBorough, error } = useAppStore();
+  const { selectedBorough, error } = useAppStore();
   const { videos, isLoading, hasMore, loadMore, refresh, initialize } = useFeed();
-  const { isAtTop, isAtBottom, pullDistance, isRefreshing, setIsRefreshing } = useRubberBand();
+  const { isAtBottom, pullDistance, isRefreshing, setIsRefreshing } = useRubberBand();
 
   // Initialize feed on mount
   useEffect(() => {
@@ -58,14 +58,13 @@ export function VideoFeed() {
         <p className="text-white/60 mb-6 text-center">
           {error}
         </p>
-        <motion.button
-          whileTap={{ scale: 0.95 }}
+        <button
           onClick={() => refresh()}
-          className="flex items-center space-x-2 px-4 py-2 bg-nyc-blue rounded-lg text-white font-medium hover:bg-nyc-blue/80 transition-colors"
+          className="flex items-center space-x-2 px-4 py-2 bg-nyc-blue rounded-lg text-white font-medium hover:bg-nyc-blue/80 active:scale-95 transition-all duration-150"
         >
           <RefreshCw className="w-4 h-4" />
           <span>Try Again</span>
-        </motion.button>
+        </button>
       </motion.div>
     );
   }
@@ -89,19 +88,21 @@ export function VideoFeed() {
         style={{ paddingTop: `${pullDistance}px` }}
         className="px-4 py-6 space-y-6"
       >
-        <AnimatePresence>
+        <div className="space-y-6">
           {videos.map((video, index) => (
             <motion.div
               key={video.video_id}
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -50 }}
-              transition={{ delay: index * 0.1 }}
+              transition={{
+                duration: 0.3,
+                delay: Math.min(index * 0.05, 0.3) // Cap delay to prevent long waits
+              }}
             >
               <VideoCard video={video} />
             </motion.div>
           ))}
-        </AnimatePresence>
+        </div>
 
         {/* Loading more indicator */}
         {isLoading && videos.length > 0 && (
@@ -121,14 +122,13 @@ export function VideoFeed() {
             <p className="text-white/60 text-sm text-center mb-3">
               Failed to load more videos
             </p>
-            <motion.button
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={() => loadMore()}
-              className="flex items-center space-x-2 px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 text-sm hover:bg-red-500/30 transition-colors"
+              className="flex items-center space-x-2 px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 text-sm hover:bg-red-500/30 active:scale-95 transition-all duration-150"
             >
               <RefreshCw className="w-3 h-3" />
               <span>Retry</span>
-            </motion.button>
+            </button>
           </motion.div>
         )}
 

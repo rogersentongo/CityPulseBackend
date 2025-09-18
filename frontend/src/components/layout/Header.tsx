@@ -5,7 +5,7 @@ import { MapPin, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { useAppStore } from '@/store';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { BOROUGH_COLORS, Borough } from '@/types/api';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 
 interface HeaderProps {
   title?: string;
@@ -14,7 +14,7 @@ interface HeaderProps {
   onSettingsClick?: () => void;
 }
 
-export function Header({
+export const Header = memo(function Header({
   title,
   showBorough = true,
   showSettings = false,
@@ -69,12 +69,9 @@ export function Header({
                 </div>
                 {showBorough && selectedBorough && (
                   <div className="relative">
-                    <motion.button
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      whileTap={{ scale: 0.95 }}
+                    <button
                       onClick={() => setShowBoroughMenu(!showBoroughMenu)}
-                      className="flex items-center space-x-1 px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                      className="flex items-center space-x-1 px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 transition-all duration-150 animate-in fade-in zoom-in-95 duration-300"
                     >
                       <MapPin
                         className="w-3 h-3"
@@ -84,7 +81,7 @@ export function Header({
                         {selectedBorough}
                       </span>
                       <ChevronDown className="w-3 h-3 text-white/60" />
-                    </motion.button>
+                    </button>
 
                     {/* Borough dropdown */}
                     {showBoroughMenu && (
@@ -122,18 +119,15 @@ export function Header({
             {/* User indicator with logout */}
             {userId && (
               <div className="relative">
-                <motion.button
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  whileTap={{ scale: 0.95 }}
+                <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="px-2 py-1 rounded-lg bg-nyc-blue/20 border border-nyc-blue/30 hover:bg-nyc-blue/30 transition-colors flex items-center space-x-1"
+                  className="px-2 py-1 rounded-lg bg-nyc-blue/20 border border-nyc-blue/30 hover:bg-nyc-blue/30 active:scale-95 transition-all duration-150 flex items-center space-x-1 animate-in fade-in zoom-in-95 duration-300"
                 >
                   <span className="text-xs font-medium text-white/80">
                     {userId}
                   </span>
                   <ChevronDown className="w-3 h-3 text-white/60" />
-                </motion.button>
+                </button>
 
                 {/* User menu */}
                 {showUserMenu && (
@@ -157,13 +151,12 @@ export function Header({
 
             {/* Settings button */}
             {showSettings && (
-              <motion.button
-                whileTap={{ scale: 0.9 }}
+              <button
                 onClick={onSettingsClick}
-                className="p-2 rounded-lg backdrop-blur-glass bg-glass-dark border border-glass-border hover:bg-white/10 transition-colors"
+                className="p-2 rounded-lg backdrop-blur-glass bg-glass-dark border border-glass-border hover:bg-white/10 active:scale-90 transition-all duration-150"
               >
                 <Settings className="w-5 h-5 text-white/80" />
-              </motion.button>
+              </button>
             )}
 
             {/* Theme toggle */}
@@ -173,4 +166,4 @@ export function Header({
       </div>
     </motion.header>
   );
-}
+});

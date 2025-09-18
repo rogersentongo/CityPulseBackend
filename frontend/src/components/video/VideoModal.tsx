@@ -74,7 +74,7 @@ export function VideoModal({ video, isOpen, onClose }: VideoModalProps) {
 
                     <div className="flex items-center">
                       <Clock className="w-4 h-4 mr-1" />
-                      {formatDistanceToNow(video.uploaded_at)}
+                      {formatDistanceToNow(video.uploaded_at || video.created_at)}
                     </div>
                   </div>
 

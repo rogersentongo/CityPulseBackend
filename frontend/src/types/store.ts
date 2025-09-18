@@ -60,7 +60,7 @@ export interface UploadState {
   isUploading: boolean;
   uploadProgress: number;
   uploadError: string | null;
-  uploadResult: any | null;
+  uploadResult: unknown | null;
   selectedFile: File | null;
 }
 
@@ -68,7 +68,7 @@ export interface UploadActions {
   setUploading: (uploading: boolean) => void;
   setUploadProgress: (progress: number) => void;
   setUploadError: (error: string | null) => void;
-  setUploadResult: (result: any) => void;
+  setUploadResult: (result: unknown) => void;
   setSelectedFile: (file: File | null) => void;
   resetUpload: () => void;
 }

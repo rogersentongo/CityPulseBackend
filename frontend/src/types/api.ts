@@ -5,10 +5,14 @@ export interface VideoResponse {
   video_id: string;
   media_url: string;
   title: string;
+  description?: string;
   tags: string[];
   borough: Borough;
   created_at: string;
+  uploaded_at?: string;
   duration_sec: number;
+  user_liked?: boolean;
+  like_count?: number;
 }
 
 export interface FeedResponse {

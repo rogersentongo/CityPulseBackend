@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Heart, MapPin, Clock } from 'lucide-react';
+import { Play, MapPin, Clock } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassLikeButton } from '@/components/interactions/GlassLikeButton';
 import { VideoModal } from '../video/VideoModal';
@@ -13,7 +13,7 @@ interface VideoCardProps {
   video: VideoResponse;
 }
 
-export function VideoCard({ video }: VideoCardProps) {
+export const VideoCard = memo(function VideoCard({ video }: VideoCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -22,7 +22,7 @@ export function VideoCard({ video }: VideoCardProps) {
   };
 
   const thumbnailUrl = `http://localhost:8000/media/thumbnails/${video.video_id}.jpg`;
-  const fallbackThumbnail = '/api/placeholder/400/300';
+  const fallbackThumbnail = '/placeholder-thumbnail.svg';
 
   return (
     <>
@@ -37,16 +37,14 @@ export function VideoCard({ video }: VideoCardProps) {
           />
 
           {/* Play button overlay */}
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+          <button
             onClick={handlePlay}
-            className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/40 transition-colors group"
+            className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/40 transition-all duration-200 group hover:scale-105 active:scale-95"
           >
             <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center group-hover:bg-white/30 transition-colors">
               <Play className="w-8 h-8 text-white ml-1" />
             </div>
-          </motion.button>
+          </button>
 
           {/* Gradient overlay for better text readability */}
           <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/60 to-transparent" />
@@ -68,7 +66,7 @@ export function VideoCard({ video }: VideoCardProps) {
 
                 <div className="flex items-center">
                   <Clock className="w-4 h-4 mr-1" />
-                  {formatDistanceToNow(video.uploaded_at)}
+                  {formatDistanceToNow(video.uploaded_at || video.created_at)}
                 </div>
               </div>
             </div>
@@ -116,4 +114,4 @@ export function VideoCard({ video }: VideoCardProps) {
       />
     </>
   );
-}
+});

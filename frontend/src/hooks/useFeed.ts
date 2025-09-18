@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import { useAppStore } from '@/store';
 import { apiClient } from '@/lib/api';
-import { VideoResponse } from '@/types/api';
 
 export function useFeed() {
   const {
@@ -77,8 +76,6 @@ export function useFeed() {
     userId,
     selectedBorough,
     currentPage,
-    videos,
-    setVideos,
     addVideos,
     setLoading,
     setHasMore,
